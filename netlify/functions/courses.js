@@ -61,6 +61,9 @@ exports.handler = async function(event) {
     name: courseData.name
   }
 
+  let courseNumRatings = +0
+  let courseRatingsTotal = +0
+
   // set a new Array as part of the return value
   returnValue.sections = []
 
@@ -94,7 +97,54 @@ exports.handler = async function(event) {
     returnValue.sections.push(sectionObject)
 
     // 🔥 your code for the reviews/ratings goes here
+
+    // set a new Array as part of the return value
+    returnValue.sections[i].reviews = []
+
+    // ask Firebase for the reviews corresponding to the Document ID of the review, wait for the response
+    let reviewsQuery = await db.collection('reviews').where(`sectionId`, `==`, sectionId).get()
+
+    // get the reviews from the query
+    let reviews = reviewsQuery.docs
+
+    let sectionNumRatings = +0
+    let sectionRatingsTotal = +0
+
+    // loop through the reviews
+    for (let reviewIndex = 0; reviewIndex < reviews.length; reviewIndex++) {
+      // get the document ID of the review
+      let reviewId = reviews[reviewIndex].id
+
+      // get the data from the review
+      let reviewData = reviews[reviewIndex].data()
+
+      // create an Object to be added to the return value of our lambda
+      let reviewObject = {}
+
+      // add the review rating to the review Object
+      reviewObject.rating = reviewData.rating
+
+      // add the review body to the review Object
+      reviewObject.body = reviewData.body
+
+      courseNumRatings++
+      courseRatingsTotal += +reviewObject.rating
+      sectionNumRatings++
+      sectionRatingsTotal += +reviewObject.rating
+
+      // add the review Object to the return value
+      returnValue.sections[i].reviews.push(reviewObject)
+
+    }
+
+
+    returnValue.sections[i].totalSectionReviews = sectionNumRatings
+    returnValue.sections[i].averageSectionRating = sectionRatingsTotal/sectionNumRatings
+
   }
+
+  returnValue.totalCourseReviews = courseNumRatings
+  returnValue.averageCourseRating = courseRatingsTotal/courseNumRatings
 
   // return the standard response
   return {
