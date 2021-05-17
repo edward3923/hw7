@@ -61,6 +61,7 @@ exports.handler = async function(event) {
     name: courseData.name
   }
 
+  // variables to store the number of course ratings and the sum of ratings (to be divided by number of ratings at the end to get the average)
   let courseNumRatings = +0
   let courseRatingsTotal = +0
 
@@ -107,6 +108,7 @@ exports.handler = async function(event) {
     // get the reviews from the query
     let reviews = reviewsQuery.docs
 
+    // variables to store the number of section ratings and the sum of ratings (to be divided by number of ratings at the end to get the average)
     let sectionNumRatings = +0
     let sectionRatingsTotal = +0
 
@@ -127,6 +129,7 @@ exports.handler = async function(event) {
       // add the review body to the review Object
       reviewObject.body = reviewData.body
 
+      // increment all the ratings by the respective data
       courseNumRatings++
       courseRatingsTotal += +reviewObject.rating
       sectionNumRatings++
@@ -137,12 +140,13 @@ exports.handler = async function(event) {
 
     }
 
-
+    // add number of section ratings and average to the returnValue
     returnValue.sections[i].totalSectionReviews = sectionNumRatings
     returnValue.sections[i].averageSectionRating = sectionRatingsTotal/sectionNumRatings
 
   }
 
+  // add number of course ratings and average to the returnValue
   returnValue.totalCourseReviews = courseNumRatings
   returnValue.averageCourseRating = courseRatingsTotal/courseNumRatings
 
